@@ -30,12 +30,13 @@ for install dependencies please read Project installation file
 ## Edit python files
 1. open inventory/settings.py
 2. comment following lines:
-    ` DATABASES = {`
-     `'default': {`
-         `'ENGINE': 'django.db.backends.sqlite3',`
-         `'NAME': str(BASE_DIR / 'db.sqlite3'),`
-     `}`
-     `}`
+    ```
+     DATABASES = {
+     'default': {
+         'ENGINE': 'django.db.backends.sqlite3',
+         'NAME': str(BASE_DIR / 'db.sqlite3'),
+     }
+     }```
 3. uncomment following lines like this:
        ` DATABASES = {`
     `     'default': {`
