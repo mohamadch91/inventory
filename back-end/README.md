@@ -39,7 +39,8 @@ for install dependencies please read Project installation file
      } 
      ```
 3. uncomment following lines like this:
-       ``` DATABASES = {
+       ```
+        DATABASES = {
          'default': {
      'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'nw_db',
