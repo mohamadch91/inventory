@@ -48,15 +48,17 @@ for install dependencies please read Project installation file
         'PASSWORD': 'changed_password',
         'HOST': 'localhost',
         'PORT': '',
-}
-} 
-```
+    }
+       } 
+        ```
 ##  Load initial datas
- for loading data base tables and please use this commands:
+for loading data base tables and please use this commands:
     ```bash
-    python3 manage.py makemigrations
+        python3 manage.py makemigrations
     ```
-    ```bashpython3 manage.py migrate
+
+    ```bash
+    python3 manage.py migrate
     ```
 then you must load initial data
     ```bash
