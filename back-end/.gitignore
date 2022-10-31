@@ -1,0 +1,13 @@
+# *.sqlite3
+# db.sqlite3
+# /*.sqlite3
+
+__pycache__/
+*.py[cod]
+/all_fixtures
+*.xlsx
+readexcelfile.py
+readexcelfile1.py
+/.cloud/
+.cloud/
+/.cloud
