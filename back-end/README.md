@@ -53,26 +53,26 @@ for install dependencies please read Project installation file
         ```
 ##  Load initial datas
 for loading data base tables and please use this commands:
-    ```bash
+```bash
         python3 manage.py makemigrations
-    ```
+```
 
-    ```bash
+```bash
     python3 manage.py migrate
-    ```
+```
 then you must load initial data
-    ```bash
+```bash
     python3 mannage.py loaddata initial.json
-    ```
+```
 now you have user admin with password admin
 for load translations data please use following command
-    ```bash
+```bash
     python3 manage.py loaddata languages/fixtures/fix.json
-    ```
+```
     
 ## Run project
 for run the project 
-    ```bash
+```bash
     python3 manage.py runserver 0.0.0.0:8000
-    ```
+```
 you can check localhost:8000 or your server ip for successfully setup 
