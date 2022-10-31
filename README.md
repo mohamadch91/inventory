@@ -33,3 +33,7 @@ sudo apt install postgresql postgresql-contrib
 ```bash
 git clone https://github.com/mohamadch91/inventory.git
 ```
+### Done
+after complete installation 
+1. go to backend folder and install
+2. then go to front end folder and install
