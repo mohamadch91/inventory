@@ -71,12 +71,12 @@ for load translations data please use following command
 ```
 ## Change nginx config
 1. open /etc/nginx/sites-enabled with following command:
-    `sudo nano /etc/nginx/sites-enabled/my-domain`
+    `sudo nano /etc/nginx/sites-enabled/example`
 2. add following lines:
 ```
    server {
     listen 80;
-    server_name dla.invgap.org;
+    server_name example.com;
 
     location / {
         proxy_set_header   X-Forwarded-For $remote_addr;
@@ -86,7 +86,7 @@ for load translations data please use following command
 }
 server {
     listen 80;
-    server_name dlb.invgap.org;
+    server_name apiexample.com;
 
     location / {
         proxy_set_header   X-Forwarded-For $remote_addr;
