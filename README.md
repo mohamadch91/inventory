@@ -37,3 +37,30 @@ git clone https://github.com/mohamadch91/inventory.git
 after complete installation 
 1. go to backend folder and install
 2. then go to front end folder and install
+
+# Deployment
+
+## Backend
+
+### go to backend folder
+```bash
+cd inventory-Backend
+```
+then use following command for run server
+```bash
+screen python3 manage.py runserver 0.0.0.0:8000
+```
+
+## Frontend
+
+### go to frontend folder
+```bash
+cd inventory-front-end
+```
+then use following command for run server
+```bash
+pm2 serve build 3000 --spa
+```
+
+# License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
