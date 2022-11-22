@@ -1791,7 +1791,7 @@
         s = l(43144),
         c = l(39877),
         i = l(54318),
-        a = (l(74569), "https://ukrapi.invgap.org/facilities/"),
+        a = (l(74569), "https://example.com/facilities/"),
         r = (function () {
           function e() {
             (0, t.Z)(this, e);
@@ -1854,11 +1854,9 @@
               {
                 key: "importFacilities",
                 value: function (e) {
-                  return c.Z.post(
-                    "https://ukrapi.invgap.org/facilities/import",
-                    e,
-                    { headers: { Authorization: (0, i.Z)() } }
-                  );
+                  return c.Z.post("https://example.com/facilities/import", e, {
+                    headers: { Authorization: (0, i.Z)() },
+                  });
                 },
               },
               {
@@ -1888,7 +1886,7 @@
         s = l(43144),
         c = l(54318),
         i = l(39877),
-        a = "https://ukrapi.invgap.org/reports/",
+        a = "https://example.com/reports/",
         r = (function () {
           function e() {
             (0, t.Z)(this, e);

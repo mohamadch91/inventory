@@ -225,7 +225,7 @@
         r = n(43144),
         a = n(39877),
         s = n(54318),
-        c = (n(74569), "https://ukrapi.invgap.org/facilities/"),
+        c = (n(74569), "https://example.com/facilities/"),
         l = (function () {
           function e() {
             (0, i.Z)(this, e);
@@ -288,11 +288,9 @@
               {
                 key: "importFacilities",
                 value: function (e) {
-                  return a.Z.post(
-                    "https://ukrapi.invgap.org/facilities/import",
-                    e,
-                    { headers: { Authorization: (0, s.Z)() } }
-                  );
+                  return a.Z.post("https://example.com/facilities/import", e, {
+                    headers: { Authorization: (0, s.Z)() },
+                  });
                 },
               },
               {
