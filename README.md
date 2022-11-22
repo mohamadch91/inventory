@@ -1,4 +1,4 @@
-This project is designed by WVSSM team 
+
 @developer : https://github.com/mohamadch91
 
 # Inventory and Gap Analysis System
@@ -62,5 +62,3 @@ then use following command for run server
 pm2 serve build 3000 --spa
 ```
 
-# License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
