@@ -58,6 +58,7 @@ after complete installation
 
 ## Backend
 
+[Backend Repository](https://github.com/mohamadch91/inventory-Backend)
 ### go to backend folder
 ```bash
 cd inventory-Backend
@@ -68,7 +69,7 @@ screen python3 manage.py runserver 0.0.0.0:8000
 ```
 
 ## Frontend
-
+[Frontend Repository](https://github.com/mohamadch91/inventory-front-end)
 ### go to frontend folder
 ```bash
 cd inventory-front-end
