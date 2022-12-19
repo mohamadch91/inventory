@@ -203,13 +203,13 @@ class facilitysegView(APIView):
                     all_fac=all_fac.filter(is_functioning=False)
 
             if(general_from is not None):
-                all_fac=all_fac.filter(populationnumber__gte=name)
+                all_fac=all_fac.filter(populationnumber__gte=general_from)
             if(general_to is not None):
-                all_fac=all_fac.filter(populationnumber__lte=name)
+                all_fac=all_fac.filter(populationnumber__lte=general_to)
             if(under_from is not None):
-                all_fac=all_fac.filter(childrennumber__gte=name)
+                all_fac=all_fac.filter(childrennumber__gte=under_from)
             if(under_to is not None):
-                all_fac=all_fac.filter(childrennumber__lte=name)
+                all_fac=all_fac.filter(childrennumber__lte=under_to)
 
             ans=[]
             for x in all_fac:
@@ -370,7 +370,6 @@ class facilitymap(APIView):
             for x in all_fac:
                 try:
                     if(x.gpsCordinate is not None):
-                        print(x.gpsCordinate)
                         lat=float(x.gpsCordinate.split(",")[0].split("(")[1])
                         lang=float(x.gpsCordinate.split(",")[1].split(")")[0])
                         data={
@@ -1121,6 +1120,12 @@ class gapItemReportView(APIView):
                 fcapacity5=0
 
                 items=item.objects.filter(facility=x.id,isDel=False)
+                cr_count=items.filter(item_type=1).count()
+                fr_count=items.filter(item_type=2).count()
+                ref_count=items.filter(item_type=3).count()
+                f_count=items.filter(item_type=4).count()
+                crf_count=items.filter(item_type=5).count()
+                ucf_count=items.filter(item_type=6).count()
                 for y in items:
                     if(degree=="1"):
                         if(y.StorageCondition=="2"):
@@ -1131,22 +1136,30 @@ class gapItemReportView(APIView):
                     if(degree=="2"):
                         if(y.StorageCondition=="3"):
                             if(y.NetVaccineStorageCapacity is not None):
-
                                 capacity2+=y.NetVaccineStorageCapacity
                                 if(y.IsItFunctioning):
                                     fcapacity2+=y.NetVaccineStorageCapacity
+                            elif(y.FreezerNetCapacity is not None):
+                                capacity2+=y.FreezerNetCapacity
+                                if(y.IsItFunctioning):
+                                    fcapacity2+=y.FreezerNetCapacity
                     if(degree=="3"):
                         if(y.StorageCondition=="4"):
                             if(y.NetVaccineStorageCapacity is not None):
                                 capacity3+=y.NetVaccineStorageCapacity
                                 if(y.IsItFunctioning):
                                     fcapacity3+=y.NetVaccineStorageCapacity
+                            elif(y.FreezerNetCapacity is not None):
+                                capacity3+=y.FreezerNetCapacity
+                                if(y.IsItFunctioning):
+                                    fcapacity3+=y.FreezerNetCapacity
                     if(degree=="4"):
                         if(y.StorageCondition=="1"):
                             if(y.NetVaccineStorageCapacity is not None):
                                 capacity4+=y.NetVaccineStorageCapacity
                                 if(y.IsItFunctioning):
                                     fcapacity4+=y.NetVaccineStorageCapacity
+                           
                     if(degree=="5"):
                         if(y.StorageCondition=="5"):
                             if(y.NetVaccineStorageCapacity is not None):
@@ -1249,6 +1262,20 @@ class gapItemReportView(APIView):
                     "exceed3":excees3,
                     "exceed4":excees4,
                     "exceed5":excees5,
+                    "item_type" : {
+                        "name":"Cold room",
+                            "count":cr_count,
+                            "name1":"Freezer room",
+                            "count1":fr_count,
+                            "name2":"Refrigerator",
+                            "count2":ref_count,
+                            "name3":"Ultra cold freezer (-70 C)",
+                            "count3":ucf_count,
+                              "name4":"Freezer",
+                            "count4":f_count,
+                            "name5":"Combined refrigerator and freezer",
+                            "count5":crf_count,
+                    }
 
                 }
                 else:
@@ -1268,30 +1295,66 @@ class gapItemReportView(APIView):
                         data["req1"]=req1
                         data["excees1"]=fcapacity1-req1
                         data["exceed1"]=excees1
+                        data["item_type"]={
+                            "name":"Cold room",
+                            "count":cr_count,
+                            "name1":"Freezer room",
+                            "count1":fr_count,
+                            "name2":"Refrigerator",
+                            "count2":ref_count
+                        }
                     if(degree=="2"):
                         data["tcapacity1"]=capacity2
                         data["fcapacity1"]=fcapacity2
                         data["req1"]=req2
                         data["excees1"]=fcapacity2-req2
                         data["exceed1"]=excees2
+                        data["item_type"]={
+                            "name":"Freezer",
+                            "count":f_count,
+                            "name1":"Combined refrigerator and freezer",
+                            "count1":crf_count,
+                            
+                        }
                     if(degree=="3"):
                         data["tcapacity1"]=capacity3
                         data["fcapacity1"]=fcapacity3
                         data["req1"]=req3
                         data["excees1"]=fcapacity3-req3
                         data["exceed1"]=excees3
+                        data["item_type"]={
+                            "name":"Ultra cold freezer (-70 C)",
+                            "count":ucf_count,
+                          
+                        }
                     if(degree=="4"):                        
                         data["tcapacity1"]=capacity4
                         data["fcapacity1"]=fcapacity4
                         data["req1"]=req4
                         data["excees1"]=fcapacity4-req4
                         data["exceed1"]=excees4
+                        data["item_type"]={
+                            "name":"Cold room",
+                            "count":cr_count,
+                            "name1":"Freezer room",
+                            "count1":fr_count,
+                            "name2":"Refrigerator",
+                            "count2":ref_count
+                        }
                     if(degree=="5"):
                         data["tcapacity1"]=capacity5
                         data["fcapacity1"]=fcapacity5
                         data["req1"]=req5
                         data["excees1"]=fcapacity5-req5
                         data["exceed1"]=excees5
+                        data["item_type"]={
+                            "name":"Cold room",
+                            "count":cr_count,
+                            "name1":"Freezer room",
+                            "count1":fr_count,
+                            "name2":"Refrigerator",
+                            "count2":ref_count
+                        }
                 parent_save=None
                 if(x.parentid is not None):
                     parent_save=x.parentid.id           

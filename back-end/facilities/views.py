@@ -33,6 +33,7 @@ from settings.models import *
 from settings.serializers import *
 from item.models import *
 import copy
+import pandas
 class FacilityView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -53,7 +54,7 @@ class FacilityView(APIView):
         facility_num=f"{facility_num:05d}"
         new_data["code"]=f"{country_code}{level_code}{facility_num}"
         new_data["country"]=country.id
-        new_data["parentid"]=get_object_or_404(Facility,name=request.data["parentName"]).id
+        new_data["parentid"]=get_object_or_404(Facility,name=request.data["parentName"].split(" - ")[0]).id
         new_data["completerstaffname"]=request.user.id
         serializer =   facilitySerializer(data=new_data)
         if serializer.is_valid():
@@ -131,7 +132,6 @@ class FacilityView(APIView):
         return Response(ser_copy)
 
     def put(self, request ):
-        print(request)
         id=request.data["id"]
         country = get_object_or_404(Facility, id=id)
         data=copy.deepcopy(request.data)
@@ -159,7 +159,6 @@ class facilityFieldView(APIView):
     def get(self, request):
         parent=request.query_params.get('parent',None)
         id=request.query_params.get('id',None)
-        print(id)
         user=request.user
         user_ser=UserSerializer(user,many=False)
         this_facility=Facility.objects.filter(id=user.facilityid.id)[0]
@@ -172,7 +171,7 @@ class facilityFieldView(APIView):
 
         fac_ser=facilitySerializer(this_facility,many=False)
         country=get_object_or_404(CountryConfig,id=this_facility.country.id)
-        parent_num=Facility.objects.filter(parentid=this_facility.id).count()
+        parent_num=Facility.objects.filter(parentid=this_facility.id,is_deleted=False).count()
         parents=facilitySerializer(parent_num,many=True)
         if(id is None or id =="new"):
             if(this_facility.loverlevelfac is not None):            
@@ -181,7 +180,7 @@ class facilityFieldView(APIView):
 
 
         level=this_facility.level
-        allow_levels=LevelConfig.objects.filter(id__gt=level.id)
+        allow_levels=LevelConfig.objects.filter(id__gte=level.id)
         if(id is not None):
             if(id=="1"):
                 allow_levels=LevelConfig.objects.filter(id__gte=level.id)
@@ -357,7 +356,7 @@ class facilityFieldView(APIView):
             ans.append(data)
         fac_data={
             "id":fac_ser.data["id"],
-            "name":fac_ser.data["name"]
+            "name":fac_ser.data["name"]+" - "+fac_ser.data["code"][3:],
         }
         if(id is not None):
             if(id=="1"):
@@ -434,11 +433,9 @@ class importfacilityView(APIView):
                 data["name"]=x["name"]    
             if(x["parentid"] is None):
                 if(x["level"] is not None):
-                    if(x["level"]==2):
                         data["parentid"]=1
-                    else:    
-                        return Response("parentid is required",status=status.HTTP_406_NOT_ACCEPTABLE)
-            else:
+
+            else:   
                 if(counter==0):
                     data["parentid"]=1
                     code.append(x["parentid"])
@@ -523,24 +520,166 @@ class importfacilityView(APIView):
         return Response(ans,status=status.HTTP_200_OK)
 
 
-                    
+class DeletefacilityView(APIView):
+    def get(self,request):
+        count=0
+        fac=Facility.objects.all()
+        for i in fac:
+            # continue
+            if(i.gpsCordinate !=None):
+                str=i.gpsCordinate
+                str=str.replace(" ","")
+                i.gpsCordinate=str
+                i.save()
+            # love=Facility.objects.filter(parentid=i.id)
+
+            # if(love.count()>=i.loverlevelfac):
+            #     i.loverlevelfac=love.count()+1
+            #     i.save()
+            # if(i.id!=1):
+            #     i.delete()
+
+        return Response(count,status=status.HTTP_200_OK)
+
+
+
                 
 class testdb(APIView):
-    def post(self,request):
-        new_data=copy.deepcopy(request.data)
-        for x in new_data:
-            parent=None
-            if(x["parent"] is not None):
-                parent=Facility.objects.filter(name=x["parent"].strip())[0].id
-            x["parentid"]=parent
-            x.pop("parent")
-            ser=facilitySerializer(data=x)
-            if(ser.is_valid()):
-                ser.save()
-            else:
-                return Response(ser.errors,status=status.HTTP_406_NOT_ACCEPTABLE)
+    def get(self,request):
+        excel_data_df = pandas.read_excel('tfac.xlsx', sheet_name='Facilities')
+        excel_data_df.fillna("###", inplace=True)
+        counter=0
+        for i in range(len(excel_data_df)): 
+            z=int(excel_data_df['Isdel'][i])
+            if(z==0):
+                counter+=1
+                dic={
+                "country": 1,
+                "parent":excel_data_df['parent'][i],
+                "name": excel_data_df['name'][i],
+                "other_code": excel_data_df['code'][i],
+                    "level": int(excel_data_df['level'][i]),
+                    "populationnumber": int(excel_data_df['populationNumber'][i]),
+                    "childrennumber": int(excel_data_df['childrenNumber'][i]),
+                    "gpsCordinate": "LatLng("+str(excel_data_df['gps'][i])+")",
+                    "city": excel_data_df['city'][i],
+                    "address": excel_data_df['address'][i],
+                    "havegen": excel_data_df['HaveGenerator'][i],
+                    "loverlevelfac": excel_data_df['lowerLevel'][i],
+                    "type":excel_data_df['typeval'][i],
+                    "district":excel_data_df['district'][i],
+                    "ownership":excel_data_df['ownership'][i],
+                    "powersource":excel_data_df['powersource'][i],   
+                    "total_staff":excel_data_df['staffNumber'][i], 
+                    "prof_staff":excel_data_df['NumProfStaff'][i], 
+                    "total_staff":excel_data_df['staffNumber'][i], 
+                    "drivers":excel_data_df['NumDriverStaff'][i], 
+                    "haveinternet":excel_data_df['haveInternet'][i], 
+                    "phone":excel_data_df['phone'][i], 
+                    "year":excel_data_df['year'][i],
+                    "working_from":excel_data_df['workingHFrom'][i],
+                    "working_to":excel_data_df['workingHTo'][i],
+                }
+                country=CountryConfig.objects.all()[0]
+                country_code=country.codecountry
+                level_code=dic["level"]
+                level_code =f"{level_code:02d}"
+                if(len(Facility.objects.filter(level=level_code))==0):
+                    facility_num=0
+                else:
+                    facility_num=Facility.objects.filter(level=level_code).count()
+                facility_num=facility_num+1
+                facility_num=f"{facility_num:05d}"
+                dic["code"]=f"{country_code}{level_code}{facility_num}"
 
-        return Response("salam",status=status.HTTP_200_OK)        
+
+                ## iterate all keys and check for  ### value
+                dic_copy=dic.copy()
+                if( "###" in dic['gpsCordinate']):
+                    del dic_copy['gpsCordinate']
+                for i in dic.keys():
+                    if(dic[i] == "###"):
+                        del dic_copy[i]
+                dic=dic_copy
+                if 'type' in dic and ((dic['type']!=None) or dic['type']!=""):
+                    new_type=facilityParamDescription.objects.filter(name=dic['type'])
+                    if (new_type.count()>0):
+                        dic['type']=new_type[0].id
+                    else:
+                        temp_param={
+                            "name":dic['type'],
+                            "paramid":12,
+                            "enabled":True,
+                            "order":1
+                        }
+                        ser=facilityParamDescriptionSerilizer(data=temp_param)
+                        if(ser.is_valid()):
+                            ser.save()
+                            dic['type']=ser.data["id"]
+                        
+                if  'ownership' in dic   and ((dic['ownership']!=None) or dic['ownership']!=""):
+                    new_ownership=facilityParamDescription.objects.filter(name=dic['ownership'])
+                    if(new_ownership.count()>0):
+                        dic['ownership']=new_ownership[0].id
+                    else:
+                        temp_param={
+                            "name":dic['ownership'],
+                            "paramid":5,
+                            "enabled":True,
+                            "order":1
+                        }
+                        ser=facilityParamDescriptionSerilizer(data=temp_param)
+                        if(ser.is_valid()):
+                            ser.save()
+                            dic['ownership']=ser.data["id"]
+                if 'powersource' in dic and ((dic['powersource']!=None) or dic['powersource']!=""):
+                    new_powersource=facilityParamDescription.objects.filter(name=dic['powersource'])
+                    if(new_powersource.count()>0):
+                        dic['powersource']=new_powersource[0].id
+                    else:
+                        temp_param={
+                            "name":dic['powersource'],
+                            "paramid":10,
+                            "enabled":True,
+                            "order":1
+                        }
+                        ser=facilityParamDescriptionSerilizer(data=temp_param)
+                        if(ser.is_valid()):
+                            ser.save()
+                            dic['powersource']=ser.data["id"]
+                dic['is_suitable']=True
+                if(counter==1):
+                    dic['id']=1
+                    dic['parent']=None
+                    facility=get_object_or_404(Facility,id=1)
+                    ser=facilitySerializer(facility,data=dic)
+                    if(ser.is_valid()):
+                        ser.save()
+                    else:
+                        res={
+                            "error":ser.errors,
+                            "counter":counter
+                        }
+                        return Response(res,status=status.HTTP_406_NOT_ACCEPTABLE)
+                else:
+                    parent_name=dic['parent'].strip()
+                    parent=Facility.objects.filter(name=parent_name)
+                    parent=parent[parent.count()-1]
+                    del dic['parent']
+                    dic['parentid']=parent.id
+                    ser=facilitySerializer(data=dic)
+                    if(ser.is_valid()):
+                        ser.save()
+                    else:
+                        res={
+                            "error":ser.errors,
+                            "counter":counter
+                        }
+                        return Response(res,status=status.HTTP_406_NOT_ACCEPTABLE)
+                        
+        return Response({"counter":counter},status=status.HTTP_200_OK)
+
+
 
 
 class facilityFieldprintView(APIView):
@@ -554,7 +693,7 @@ class facilityFieldprintView(APIView):
             this_facility=get_object_or_404(Facility,id=parent)
         fac_ser=facilitySerializer(this_facility,many=False)
         country=get_object_or_404(CountryConfig,id=this_facility.country.id)
-        parent_num=Facility.objects.filter(parentid=this_facility.id).count()
+        parent_num=Facility.objects.filter(parentid=this_facility.id,is_deleted=False).count()
         parents=facilitySerializer(parent_num,many=True)
                     
  
@@ -731,7 +870,6 @@ class facilityDeleteView(APIView):
         return Response(desc_ser.data,status=status.HTTP_200_OK)
     def post(self,request):
         data=request.data
-        print(data)
         id=data["id"]
         facility = get_object_or_404(Facility, id=id)
         below=Facility.objects.filter(parentid=facility.id)

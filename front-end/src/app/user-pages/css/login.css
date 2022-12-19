@@ -1,0 +1,85 @@
+/*
+css files for login page
+*/
+
+
+
+.background-radial-gradient {
+    background-color: hsl(218, 41%, 10%);
+    background-image: radial-gradient(650px circle at 0% 0%,
+        hsl(218, 41%, 35%) 15%,
+        hsl(218, 41%, 30%) 35%,
+        hsl(218, 41%, 20%) 75%,
+        hsl(218, 41%, 19%) 80%,
+        transparent 100%),
+      radial-gradient(1250px circle at 100% 100%,
+        hsl(218, 41%, 45%) 15%,
+        hsl(218, 41%, 30%) 35%,
+        hsl(218, 41%, 20%) 75%,
+        hsl(218, 41%, 19%) 80%,
+        transparent 100%);
+  }
+
+  #radius-shape-1 {
+    height: 220px;
+    width: 220px;
+    top: -60px;
+    left: -130px;
+    background: radial-gradient(#44006b, #ad1fff);
+    overflow: hidden;
+  }
+
+  #radius-shape-2 {
+    border-radius: 38% 62% 63% 37% / 70% 33% 67% 30%;
+    bottom: -60px;
+    right: -110px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(#44006b, #ad1fff);
+    overflow: hidden;
+  }
+
+  .bg-glass {
+    background-color: hsla(0, 0%, 100%, 0.7) !important;
+    backdrop-filter: saturate(200%) blur(25px);
+  }
+  .who {
+    height: 70%;
+    width: 70%;
+  }
+  .new_row{
+    flex-wrap: nowrap!important;
+  }
+  @media screen and (max-width: 768px) {
+    .mobile{
+          display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+.mobile-padding{
+      padding-top: 0!important;
+    padding-bottom: 0!important;
+}
+    .who {
+    height: 40%;
+    width: 40%;
+    }
+    .zero_margin{
+      margin: 0!important;
+      font-size: 20px!important;
+
+    }
+    .new-margin{
+      margin-top: 0.5rem!important;
+      margin-bottom: 0.5rem!important;
+      margin-left: 0!important;
+      font-size: 20px!important;
+    }
+    .sign{
+      font-size: 15px!important;
+    }
+    }
+    
+  

@@ -69,35 +69,6 @@ for load translations data please use following command
 ```bash
     python3 manage.py loaddata languages/fixtures/fix.json
 ```
-## Change nginx config
-1. open /etc/nginx/sites-enabled with following command:
-    `sudo nano /etc/nginx/sites-enabled/example`
-2. add following lines:
-```
-   server {
-    listen 80;
-    server_name example.com;
-
-    location / {
-        proxy_set_header   X-Forwarded-For $remote_addr;
-        proxy_set_header   Host $http_host;
-        proxy_pass         "http://127.0.0.1:8000";
-    }
-}
-server {
-    listen 80;
-    server_name apiexample.com;
-
-    location / {
-        proxy_set_header   X-Forwarded-For $remote_addr;
-        proxy_set_header   Host $http_host;
-        proxy_pass         "http://127.0.0.1:3000";
-    }
-}
-```
-3. save the file and restart nginx:
-    `sudo systemctl restart nginx`
-
     
 ## Run project
 for run the project 
