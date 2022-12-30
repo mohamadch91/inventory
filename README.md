@@ -67,6 +67,24 @@ then use following command for run server
 ```bash
 screen python3 manage.py runserver 0.0.0.0:8000
 ```
+### Screen
+to see screen list use following command
+```bash
+screen -r
+```
+to detach screen use following command
+```bash
+ctrl+a  ctrl+d
+```
+to kill screen use following command
+```bash
+screen -X -S <screen_name> quit
+```
+or you can attach screen and use following command
+```bash
+ctrl+a  ctrl+z
+```
+
 
 ## Frontend
 [Frontend Repository](https://github.com/mohamadch91/inventory-front-end)
@@ -77,5 +95,30 @@ cd inventory-front-end
 then use following command for run server
 ```bash
 pm2 serve build 3000 --spa
+```
+
+to see pm2 list use following command
+```bash
+pm2 list
+```
+to kill pm2 use following command
+```bash
+pm2 kill
+```
+to restart pm2 use following command
+```bash
+pm2 restart <id>
+```
+to stop pm2 use following command
+```bash
+pm2 stop <id>
+```
+to start pm2 use following command
+```bash
+pm2 start <id>
+```
+to delete pm2 use following command
+```bash
+pm2 delete <id>
 ```
 
