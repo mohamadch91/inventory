@@ -523,21 +523,27 @@ class importfacilityView(APIView):
 class DeletefacilityView(APIView):
     def get(self,request):
         count=0
+        # count=facilityParamDescription.objects.filter(name="Kulyab Region")
+        # count=facilityParamDescriptionSerilizer(count,many=True).data
+        # count=Facility.objects.filter(province=35).count()
         fac=Facility.objects.all()
+
         for i in fac:
-            # continue
-            if(i.gpsCordinate !=None):
-                str=i.gpsCordinate
-                str=str.replace(" ","")
-                i.gpsCordinate=str
-                i.save()
+            # i.delete()
+        #     # continue
+        #     if(i.gpsCordinate !=None):
+        #         str=i.gpsCordinate
+        #         str=str.replace(" ","")
+        #         i.gpsCordinate=str
+        #         i.save()
             # love=Facility.objects.filter(parentid=i.id)
 
             # if(love.count()>=i.loverlevelfac):
             #     i.loverlevelfac=love.count()+1
             #     i.save()
-            # if(i.id!=1):
-            #     i.delete()
+            if(i.id!=1):
+                count+=1
+                i.delete()
 
         return Response(count,status=status.HTTP_200_OK)
 
@@ -550,6 +556,8 @@ class testdb(APIView):
         excel_data_df.fillna("###", inplace=True)
         counter=0
         for i in range(len(excel_data_df)): 
+            if(excel_data_df['Isdel'][i] == "###"):
+                continue
             z=int(excel_data_df['Isdel'][i])
             if(z==0):
                 counter+=1
@@ -569,6 +577,7 @@ class testdb(APIView):
                     "type":excel_data_df['typeval'][i],
                     "district":excel_data_df['district'][i],
                     "ownership":excel_data_df['ownership'][i],
+                    "province":excel_data_df['provinceval'][i],
                     "powersource":excel_data_df['powersource'][i],   
                     "total_staff":excel_data_df['staffNumber'][i], 
                     "prof_staff":excel_data_df['NumProfStaff'][i], 
@@ -579,7 +588,31 @@ class testdb(APIView):
                     "year":excel_data_df['year'][i],
                     "working_from":excel_data_df['workingHFrom'][i],
                     "working_to":excel_data_df['workingHTo'][i],
+                    "haveimmservice":excel_data_df['HaveImmService'][i],
+                    "typeimmservice":excel_data_df['typeimmservice'][i],
+                    "numimmperweek":excel_data_df['number of immunizationperweek'][i],
+                    "distancefromparent":excel_data_df['distanceFromParent'][i],
+                    "recieve_mode":excel_data_df['RcvVacMode'][i],
+                    "transport_mode":excel_data_df['transportmode'][i],
+                    "other1":excel_data_df['other1'][i],
+                    "other2":excel_data_df['other2'][i],
+                    "other3":excel_data_df['other3'][i],
+                    "other4":excel_data_df['other4'][i],
+                    "other6":excel_data_df['other6'][i],
+                    "other5":excel_data_df['other5'][i],
+                    "is_functioning":excel_data_df["funcstatus"][i],
+                    "individualsX1":excel_data_df["countVacc1"][i],
+                    "individualsX2":excel_data_df["countVacc2"][i],
+                    "individualsX3":excel_data_df["countVacc3"][i],
+                    "havecovid19service":excel_data_df["HaveCovid"][i],
+                    "timetoparent":excel_data_df["timeToParent"][i],
+                    "remark":excel_data_df["remark"][i],
+
+
+
+
                 }
+                
                 country=CountryConfig.objects.all()[0]
                 country_code=country.codecountry
                 level_code=dic["level"]
@@ -602,7 +635,7 @@ class testdb(APIView):
                         del dic_copy[i]
                 dic=dic_copy
                 if 'type' in dic and ((dic['type']!=None) or dic['type']!=""):
-                    new_type=facilityParamDescription.objects.filter(name=dic['type'])
+                    new_type=facilityParamDescription.objects.filter(name__icontains=dic['type'].strip())
                     if (new_type.count()>0):
                         dic['type']=new_type[0].id
                     else:
@@ -618,7 +651,7 @@ class testdb(APIView):
                             dic['type']=ser.data["id"]
                         
                 if  'ownership' in dic   and ((dic['ownership']!=None) or dic['ownership']!=""):
-                    new_ownership=facilityParamDescription.objects.filter(name=dic['ownership'])
+                    new_ownership=facilityParamDescription.objects.filter(name__icontains=dic['ownership'].strip())
                     if(new_ownership.count()>0):
                         dic['ownership']=new_ownership[0].id
                     else:
@@ -633,7 +666,7 @@ class testdb(APIView):
                             ser.save()
                             dic['ownership']=ser.data["id"]
                 if 'powersource' in dic and ((dic['powersource']!=None) or dic['powersource']!=""):
-                    new_powersource=facilityParamDescription.objects.filter(name=dic['powersource'])
+                    new_powersource=facilityParamDescription.objects.filter(name__icontains=dic['powersource'].strip())
                     if(new_powersource.count()>0):
                         dic['powersource']=new_powersource[0].id
                     else:
@@ -647,6 +680,74 @@ class testdb(APIView):
                         if(ser.is_valid()):
                             ser.save()
                             dic['powersource']=ser.data["id"]
+                if 'province' in dic and ((dic['province']!=None) or dic['province']!=""):
+                    new_powersource=facilityParamDescription.objects.filter(name__icontains=dic['province'].strip())
+                    if(new_powersource.count()>0):
+                        dic['province']=new_powersource[0].id
+                    else:
+                        temp_param={
+                            "name":dic['province'],
+                            "paramid":3,
+                            "enabled":True,
+                            "order":1
+                        }
+                        ser=facilityParamDescriptionSerilizer(data=temp_param)
+                        if(ser.is_valid()):
+                            ser.save()
+                            dic['province']=ser.data["id"]
+                        else:
+                            return Response(ser.errors)
+                if 'typeimmservice' in dic and ((dic['typeimmservice']!=None) or dic['typeimmservice']!=""):
+                    new_powersource=facilityParamDescription.objects.filter(name__icontains=dic['typeimmservice'].strip())
+                    if(new_powersource.count()>0):
+                        dic['typeimmservice']=new_powersource[0].id
+                    else:
+                        temp_param={
+                            "name":dic['typeimmservice'],
+                            "paramid":11,
+                            "enabled":True,
+                            "order":1
+                        }
+                        ser=facilityParamDescriptionSerilizer(data=temp_param)
+                        if(ser.is_valid()):
+                            ser.save()
+                            dic['typeimmservice']=ser.data["id"]
+                if 'recieve_mode' in dic and ((dic['recieve_mode']!=None) or dic['recieve_mode']!=""):
+                    new_powersource=facilityParamDescription.objects.filter(name__icontains=dic['recieve_mode'].strip())
+                    if(new_powersource.count()>0):
+                        dic['recieve_mode']=new_powersource[0].id
+                    else:
+                        temp_param={
+                            "name":dic['recieve_mode'],
+                            "paramid":7,
+                            "enabled":True,
+                            "order":1
+                        }
+                        ser=facilityParamDescriptionSerilizer(data=temp_param)
+                        if(ser.is_valid()):
+                            ser.save()
+                            dic['recieve_mode']=ser.data["id"]
+                if 'transport_mode' in dic and ((dic['transport_mode']!=None) or dic['transport_mode']!=""):
+                    new_powersource=facilityParamDescription.objects.filter(name__icontains=dic['transport_mode'].strip())
+                    if(new_powersource.count()>0):
+                        dic['transport_mode']=new_powersource[0].id
+                    else:
+                        temp_param={
+                            "name":dic['transport_mode'],
+                            "paramid":8,
+                            "enabled":True,
+                            "order":1
+                        }
+                        ser=facilityParamDescriptionSerilizer(data=temp_param)
+                        if(ser.is_valid()):
+                            ser.save()
+                            dic['transport_mode']=ser.data["id"]
+                if 'is_functioning' in dic and ((dic['is_functioning']!=None) or dic['is_functioning']!=""):
+                    if(dic['is_functioning'].strip()=="ფუნქციონირებს"):
+                        dic['is_functioning']=True
+                    else:
+                        dic['is_functioning']=False
+                
                 dic['is_suitable']=True
                 if(counter==1):
                     dic['id']=1
@@ -662,6 +763,12 @@ class testdb(APIView):
                         }
                         return Response(res,status=status.HTTP_406_NOT_ACCEPTABLE)
                 else:
+                    if('parent' not in dic):
+                        founded_parent=Facility.objects.filter(name__icontains=dic['name'].strip())
+                        if(founded_parent.count()>0):
+                            continue
+                        else:
+                            dic['parent']="დკსჯეც - ცენტრალური საწყობი"
                     parent_name=dic['parent'].strip()
                     parent=Facility.objects.filter(name=parent_name)
                     parent=parent[parent.count()-1]

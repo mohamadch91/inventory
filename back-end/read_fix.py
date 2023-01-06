@@ -11,8 +11,8 @@ dic_arr_ru=[]
 dic_arr_sp=[]
 dic_arr_en=[]
 dic_arr_ar=[]
-dic_arr_ch=[]
 dic_arr_uk=[]
+dic_arr_vi=[]
 
 
 
@@ -24,10 +24,10 @@ for i in range(len(excel_data_df)):
     fr=excel_data_df['FR'][i]
     ar=excel_data_df['AR'][i]
     ru=excel_data_df['RU'][i]
-    sp=excel_data_df['SP'][i]
+    sp=excel_data_df['ES'][i]
     uk=excel_data_df['UK'][i]
     ot=excel_data_df['Other'][i]
-    ch=excel_data_df['CH'][i]
+    vi=excel_data_df['VI'][i]
     if str(en)=='nan':
         en=cl
     if str(fr)=='nan':
@@ -37,13 +37,13 @@ for i in range(len(excel_data_df)):
     if str(ru)=='nan':
         ru='RU: '+cl
     if str(sp)=='nan':
-        sp='SP: '+cl
+        sp='ES: '+cl
     if str(ot)=='nan':
         ot='OT: '+cl
-    if str(ch)=='nan':
-        ch='CH: '+cl
     if str(uk)=='nan':
         uk='UK: '+cl
+    if str(vi)=='nan':
+        vi='VI: '+cl
     
     if ("'" in cl ):
         cl=cl.replace("'", "#")
@@ -59,10 +59,11 @@ for i in range(len(excel_data_df)):
         sp=sp.replace("'", "#")
     if ("'" in ot):
         ot=ot.replace("'", "#")
-    if ("'" in ch):
-        ch=ch.replace("'", "#")
     if ("'" in uk):
         uk=uk.replace("'", "#")
+    if ("'" in vi):
+        vi=vi.replace("'", "#")
+    
 
    
     data_en=  {
@@ -149,20 +150,22 @@ for i in range(len(excel_data_df)):
       }
     }
     dic_arr_uk.append(data_uk)
-    data_ch=  {
+   
+    data_vi=  {
       "model": "languages.languages_words",
       "pk": i*8+8,
       "fields": {
         "id":i*8+8,
         "language":8,
         "word":cl,
-        "translate":ch
-
+        "translate":vi
+        
       }
     }
-    dic_arr_ch.append(data_ch)
+    dic_arr_vi.append(data_vi)
+
 final=[]
-for a,b,c,d,e,f,g,h in zip(dic_arr_en,dic_arr_ar,dic_arr_fr,dic_arr_sp,dic_arr_ot,dic_arr_ru,dic_arr_ch,dic_arr_uk):
+for a,b,c,d,e,f,g,h in zip(dic_arr_en,dic_arr_ar,dic_arr_fr,dic_arr_sp,dic_arr_ot,dic_arr_ru,dic_arr_vi,dic_arr_uk):
     
     final.append(a)
     final.append(b)

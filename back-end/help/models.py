@@ -20,9 +20,12 @@ class Help(models.Model) :
         ot = "ot"  
         es = "es"  
         ru = "ru"  
-        ch ="ch"
         uk ="uk"
+        vi ="vi"
 
     page = models.CharField(max_length=20 , choices=choices.choices , blank=True , null=True)
     lang = models.CharField(max_length=20  ,choices=language.choices , blank=True , null=True)
     abr = models.FileField(upload_to="help" ,null=True,blank=True)
+
+    def __str__(self):
+        return self.page +"--" +self.lang + "--"+str(self.abr)

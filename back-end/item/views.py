@@ -445,25 +445,32 @@ class itemdb(APIView):
                 "item_class":excel_data_df['itemclass'][i],
                 "WorkingConditions":excel_data_df['workingCondition'][i],
                 "StorageConditions":excel_data_df['temprange'][i],
-                "EnergySource":excel_data_df['energysource'][i],
+                "EnergySource_generator":excel_data_df['energysource'][i],
                 "Manufacturer":excel_data_df['Manufacturer'][i],
                 "TypeP":excel_data_df['type'][i],
                 "Type2":excel_data_df['type2'][i],
                 "Type3":excel_data_df['type3'][i],
                 "Model":excel_data_df['model'][i],
                 "NetVaccineStorageCapacity":excel_data_df['netVaccCapacity'][i],
+                "FreezerNetCapacity":excel_data_df['capacity'][i],
+                "IceMakingCapacity":excel_data_df['iceCapacity'][i],
+                "CoolWaterProductionCapacity":excel_data_df['coolWaterCapacity'][i],
                 "RefrigerantGas":excel_data_df['refrigrationgas'][i],
                 "IsTheRefrigerantGasCFCFree":excel_data_df['CFCFree'][i],
                 "PQSPISManufacturer":excel_data_df['pqsmanufacturer'][i],
                 "PQSPISRefrigerantGas":excel_data_df['pqsrefgas'][i],
                 "PQSPISTemperatureWorkingZone":excel_data_df['pqstempzone'][i],
+                "PQSPISCode":excel_data_df['PQSCode'][i],
+                "PQSPISType":excel_data_df['pqstype'][i],
                 "Height":excel_data_df['height'][i],
                 "Width":excel_data_df['width'][i],
+                "Length":excel_data_df['length'][i],
+                "Weightkg":excel_data_df['Weight'][i],
                 "GrossVolume":excel_data_df['grossVolume'][i],
                 "NetShippingVolume":excel_data_df['netVolume'][i],
                 "Weightkg":excel_data_df['Weight'][i],
                 "DoesItHaveFreezingCompartment":True,
-                "NumberOfCoolingUnits":1,
+                "NumberOfCoolingUnits":excel_data_df['coolingUnitNumber'][i],
                 "DoesItHaveContinuousTemperatureMonitoringDevice":True,
                 "DoesItHaveAnAlarmSystem":excel_data_df['haveAlarm'][i],
                 "DoesItHaveBuiltInThermometer":True,
@@ -485,8 +492,16 @@ class itemdb(APIView):
                 "OtherFieldsItem1":excel_data_df['description'][i],
                 "YearInstalled":excel_data_df['installYear'][i],
                 "IsThereAnAutomaticStartUpSystem":True,
+                "EnergySource":excel_data_df['powerGeneration'][i],
+                "PhysicalConditions":excel_data_df['physicalCondition'][i],
+                "TechnicalConditions":excel_data_df['TechnicalCondition'][i],
+                "OriginalCost":excel_data_df['originalCost'][i],
+                "IsThereAnAutomaticStartUpSystem":excel_data_df['autoStart'][i],
+                "CoolantPackNominalCapacity":excel_data_df['CoolantPackNominalCapacity'][i],
+                "NumberOfCoolantPacksRequired":excel_data_df['coolantpacknumber'][i],
                 }
                 ## iterate all keys and check for  ### value
+
                 dic_copy=dic.copy()
                 for i in dic.keys():
                     if(dic[i] == "###"):
@@ -499,13 +514,15 @@ class itemdb(APIView):
                     continue
                 facilty=facilty[0]
                 dic['facility']=facilty.id
-                # item_class_code=dic['OtherCode'].strip()[10:13]
-                # print(item_class_code)
-                item_class=ItemClass.objects.filter(title__icontains=dic['item_class'])
+                item_class_code=dic['OtherCode'].strip()[10:13]
+                item_class=ItemClass.objects.filter(title__icontains=item_class_code)
                 if(item_class.count()==0):
-                    item_class=ItemClass.objects.filter(title__icontains='Active equipment')[0]
-                else:
-                    item_class=item_class[0]
+                    item_class_code=dic['OtherCode'].strip()[10:12]
+                    item_class=ItemClass.objects.filter(title__icontains=item_class_code)
+                    
+
+                # else:
+                item_class=item_class[0]
 
 
                 dic['item_class']=item_class.id
@@ -555,8 +572,9 @@ class itemdb(APIView):
                     item_count=item.objects.filter(facility=facilty,item_class=item_class.id,item_type=item_type.id).count()
                     item_code=f"{item_count+1:03d}"    
                 dic["code"]=f"{facilty.code}{item_class.code}{item_type.code}{item_code}"
+
                 if  'WorkingConditions' in dic   and ((dic['WorkingConditions']!=None) or dic['WorkingConditions']!=""):
-                    new_ownership=itemParamDescription.objects.filter(name__icontains=dic['WorkingConditions'])
+                    new_ownership=itemParamDescription.objects.filter(name__icontains=dic['WorkingConditions'].strip())
                     if(new_ownership.count()>0):
                         dic['WorkingConditions']=new_ownership[0].id
                     else:
@@ -570,8 +588,15 @@ class itemdb(APIView):
                         if(ser.is_valid()):
                             ser.save()
                             dic['WorkingConditions']=ser.data["id"]
+                
                 if  'EnergySource' in dic   and ((dic['EnergySource']!=None) or dic['EnergySource']!=""):
-                    new_ownership=itemParamDescription.objects.filter(name__icontains=dic['EnergySource'])
+                    if(dic['EnergySource']==-1):
+                        dic['EnergySource']="EG"
+                    elif dic['EnergySource']==154:
+                        dic['EnergySource']="დიზელი"
+                    elif dic['EnergySource']==155:
+                        dic['EnergySource']="ბენზინი"
+                    new_ownership=itemParamDescription.objects.filter(name__icontains=dic['EnergySource'].strip())
                     if(new_ownership.count()>0):
                         dic['EnergySource']=new_ownership[0].id
                     else:
@@ -587,14 +612,18 @@ class itemdb(APIView):
                             dic['EnergySource']=ser.data["id"]
                 if 'StorageConditions' in dic   and ((dic['StorageConditions']!=None) or dic['StorageConditions']!=""):
                     sg=dic['StorageConditions']
-                    if(sg=='+2 & +8 C'):
+                    if(sg=='2-8 C'):
                         dic['StorageConditions']="2"
                     elif(sg=='-20 C'):
                         dic['StorageConditions']="3"
-                    elif(sg=='-70 C'):
+                    elif(sg=='-80 C'):
                         dic['StorageConditions']="4"
+                    elif(sg=='+25 C'):
+                        dic['StorageConditions']="1"
+                    else:
+                        dic['StorageConditions']=""
                 if 'Manufacturer' in dic   and ((dic['Manufacturer']!=None) or dic['Manufacturer']!=""):
-                    Manufacturers=Manufacturer.objects.filter(describe__icontains=dic['Manufacturer'])
+                    Manufacturers=Manufacturer.objects.filter(describe__icontains=dic['Manufacturer'].strip())
                     if(Manufacturers.count()>0):
                         dic['Manufacturer']=Manufacturers[0].id
                     else:
@@ -609,7 +638,7 @@ class itemdb(APIView):
                             ser.save()
                             dic['Manufacturer']=ser.data["id"]
                 if 'TypeP' in dic   and ((dic['TypeP']!=None) or dic['TypeP']!=""):
-                    types=itemParamDescription.objects.filter(name__icontains=dic['TypeP'])
+                    types=itemParamDescription.objects.filter(name__icontains=dic['TypeP'].strip())
                     if(types.count()>0):
                         dic['TypeP']=types[0].id
                     else:
@@ -624,7 +653,7 @@ class itemdb(APIView):
                             ser.save()
                             dic['TypeP']=ser.data["id"]
                 if 'Type2' in dic   and ((dic['Type2']!=None) or dic['Type2']!=""):
-                    types=itemParamDescription.objects.filter(name__icontains=dic['Type2'])
+                    types=itemParamDescription.objects.filter(name__icontains=dic['Type2'].strip())
                     if(types.count()>0):
                         dic['Type2']=types[0].id
                     else:
@@ -654,7 +683,7 @@ class itemdb(APIView):
                             ser.save()
                             dic['Type3']=ser.data["id"]
                 if 'ReasonsForNotFunctioning' in dic   and ((dic['ReasonsForNotFunctioning']!=None) or dic['ReasonsForNotFunctioning']!=""):
-                    types=itemParamDescription.objects.filter(name__icontains=dic['ReasonsForNotFunctioning'])
+                    types=itemParamDescription.objects.filter(name__icontains=dic['ReasonsForNotFunctioning'].strip())
                     if(types.count()>0):
                         dic['ReasonsForNotFunctioning']=types[0].id
                     else:
@@ -669,7 +698,7 @@ class itemdb(APIView):
                             ser.save()
                             dic['ReasonsForNotFunctioning']=ser.data["id"]
                 if 'FinancialSource' in dic   and ((dic['FinancialSource']!=None) or dic['FinancialSource']!=""):
-                    types=itemParamDescription.objects.filter(name__icontains=dic['FinancialSource'])
+                    types=itemParamDescription.objects.filter(name__icontains=dic['FinancialSource'].strip())
                     if(types.count()>0):
                         dic['FinancialSource']=types[0].id
                     else:
@@ -683,7 +712,79 @@ class itemdb(APIView):
                         if(ser.is_valid()):
                             ser.save()
                             dic['FinancialSource']=ser.data["id"]
+                if 'EnergySource_generator' in dic   and ((dic['EnergySource_generator']!=None) or dic['EnergySource_generator']!=""):
+                    types=itemParamDescription.objects.filter(name__icontains=dic['EnergySource_generator'].strip())
+                    if(types.count()>0):
+                        dic['EnergySource_generator']=types[0].id
+                    else:
+                        temp_param={
+                            "name":dic['EnergySource_generator'],
+                            "paramid":13,
+                            "enabled":True,
+                            "order":1
+                        }
+                        ser=itemParamDescriptionSerilizer(data=temp_param)
+                        if(ser.is_valid()):
+                            ser.save()
+                            dic['EnergySource_generator']=ser.data["id"]
+                if 'PhysicalConditions' in dic   and ((dic['PhysicalConditions']!=None) or dic['PhysicalConditions']!=""):
+                    types=itemParamDescription.objects.filter(name__icontains=dic['PhysicalConditions'].strip())
+                    if(types.count()>0):
+                        dic['PhysicalConditions']=types[0].id
+                    else:
+                        temp_param={
+                            "name":dic['PhysicalConditions'],
+                            "paramid":9,
+                            "enabled":True,
+                            "order":1
+                        }
+                        ser=itemParamDescriptionSerilizer(data=temp_param)
+                        if(ser.is_valid()):
+                            ser.save()
+                            dic['PhysicalConditions']=ser.data["id"]
+                if 'TechnicalConditions' in dic   and ((dic['TechnicalConditions']!=None) or dic['TechnicalConditions']!=""):
+                    types=itemParamDescription.objects.filter(name__icontains=dic['TechnicalConditions'].strip())
+                    if(types.count()>0):
+                        dic['TechnicalConditions']=types[0].id
+                    else:
+                        temp_param={
+                            "name":dic['TechnicalConditions'],
+                            "paramid":10,
+                            "enabled":True,
+                            "order":1
+                        }
+                        ser=itemParamDescriptionSerilizer(data=temp_param)
+                        if(ser.is_valid()):
+                            ser.save()
+                            dic['TechnicalConditions']=ser.data["id"]
+                if 'IceMakingCapacity' in dic   and ((dic['IceMakingCapacity']!=None) or dic['IceMakingCapacity']!=""):
+                    dic['IceMakingCapacity']=str(dic['IceMakingCapacity']).replace(",",".")
+                    dic['IceMakingCapacity']=float(dic['IceMakingCapacity'])
+
+                
+                if 'CoolWaterProductionCapacity' in dic   and ((dic['CoolWaterProductionCapacity']!=None) or dic['CoolWaterProductionCapacity']!=""):
+                    dic['CoolWaterProductionCapacity']=str(dic['CoolWaterProductionCapacity']).replace(",",".")
+                    dic['CoolWaterProductionCapacity']=float(dic['CoolWaterProductionCapacity'])
+
+                if 'OriginalCost' in dic   and ((dic['OriginalCost']!=None) or dic['OriginalCost']!=""):
+                    dic['OriginalCost']=str(dic['OriginalCost']).replace(",",".")
+                    dic["OriginalCost"]=int(float(dic["OriginalCost"]))
+
+                if 'FreezerNetCapacity' in dic   and ((dic['FreezerNetCapacity']!=None) or dic['FreezerNetCapacity']!=""):
+                    dic['FreezerNetCapacity']=str(dic['FreezerNetCapacity']).replace(",",".")
+                    dic["FreezerNetCapacity"]=(float(dic["FreezerNetCapacity"]))
+                if 'NetVaccineStorageCapacity' in dic   and ((dic['NetVaccineStorageCapacity']!=None) or dic['NetVaccineStorageCapacity']!=""):
+                    dic['NetVaccineStorageCapacity']=str(dic['NetVaccineStorageCapacity']).replace(",",".")
+                    dic["NetVaccineStorageCapacity"]=(float(dic["NetVaccineStorageCapacity"]))
+                if 'NumberOfCoolantPacksRequired' in dic   and ((dic['NumberOfCoolantPacksRequired']!=None) or dic['NumberOfCoolantPacksRequired']!=""):
+                    dic['NumberOfCoolantPacksRequired']=str(dic['NumberOfCoolantPacksRequired']).replace(",",".")
+                    dic["NumberOfCoolantPacksRequired"]=(int(float(dic["NumberOfCoolantPacksRequired"])))
+                if 'CoolantPackNominalCapacity' in dic   and ((dic['CoolantPackNominalCapacity']!=None) or dic['CoolantPackNominalCapacity']!=""):
+                    dic['CoolantPackNominalCapacity']=str(dic['CoolantPackNominalCapacity']).replace(",",".")
+                    dic["CoolantPackNominalCapacity"]=(float(dic["CoolantPackNominalCapacity"]))
+                         
                 dic['YearInstalled']=str(dic['YearInstalled'])
+
                 if 'NotInUseSince' in dic and type(dic['NotInUseSince'])==str:
                     del dic['NotInUseSince']
                 # print(dic)
@@ -704,25 +805,30 @@ class itemdb(APIView):
 class itemdbfix(APIView):
     def get(self,request):
         count=0
-        items=item.objects.all()
-        for i in items:
-            count+=1
-            # print(i.Manufacturer)
-            if(i.Manufacturer!=None):
-                man=Manufacturer.objects.filter(id=i.Manufacturer)
-                if(man.count()==0):
-                    i.Manufacturer="100"
-                    i.save()
+        desc=ItemType.objects.all()
+        count=itemtypeSerializer(desc,many=True).data
+        items=item.objects.filter(item_type=34).count()
+        count=items
+        # items=item.objects.all()
+        # for i in items:
+        #     # count+=1
+        #     # # print(i.Manufacturer)
+        #     # if(i.Manufacturer!=None):
+        #     #     man=Manufacturer.objects.filter(id=i.Manufacturer)
+        #     #     if(man.count()==0):
+        #     #         i.Manufacturer="100"
+        #     #         i.save()
 
-            #     print(man.id)
-            #     print(man.describe)
-            # continue
-            # love=Facility.objects.filter(parentid=i.id)
+        #     #     print(man.id)
+        #     #     print(man.describe)
+        #     # continue
+        #     # love=Facility.objects.filter(parentid=i.id)
 
-            # if(love.count()>=i.loverlevelfac):
-            #     i.loverlevelfac=love.count()+1
-            #     i.save()
-            # i.delete()
+        #     # if(love.count()>=i.loverlevelfac):
+        #     #     i.loverlevelfac=love.count()+1
+        #     #     i.save()
+        #     i.delete()
+        #     count+=1
 
         return Response(count,status=status.HTTP_200_OK)
 

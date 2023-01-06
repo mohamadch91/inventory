@@ -52,7 +52,7 @@
       "model": "languages.languages",
       "pk": 8,
       "fields": {
-        "name": "ch"
+        "name": "vi"
       }
     }
 ]
