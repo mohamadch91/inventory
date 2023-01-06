@@ -90,7 +90,7 @@ ctrl+a  ctrl+z
 [Frontend Repository](https://github.com/mohamadch91/inventory-front-end)
 ### go to frontend folder
 ```bash
-cd inventory-front-end
+cd front-end
 ```
 then use following command for run server
 ```bash
